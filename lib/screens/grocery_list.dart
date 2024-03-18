@@ -29,13 +29,22 @@ class _GroceryListState extends State<GroceryList> {
     });
   }
 
+  void _removeItem(GroceryItem item) {
+    setState(() {
+      _groceryItems.remove(item);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget content = ListView.builder(
       itemCount: _groceryItems.length,
       itemBuilder: ((context, index) {
         var item = _groceryItems[index];
-        return ListItem(item: item);
+        return ListItem(
+          item: item,
+          onRemoveItem: _removeItem,
+        );
       }),
     );
 
