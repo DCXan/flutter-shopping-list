@@ -31,23 +31,30 @@ class _GroceryListState extends State<GroceryList> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Your Groceries'),
-        actions: [
-          IconButton(
-            onPressed: _addItem,
-            icon: const Icon(Icons.add),
-          ),
-        ],
-      ),
-      body: ListView.builder(
-        itemCount: _groceryItems.length,
-        itemBuilder: ((context, index) {
-          var item = _groceryItems[index];
-          return ListItem(item: item);
-        }),
-      ),
+    Widget content = ListView.builder(
+      itemCount: _groceryItems.length,
+      itemBuilder: ((context, index) {
+        var item = _groceryItems[index];
+        return ListItem(item: item);
+      }),
     );
+
+    if (_groceryItems.isEmpty) {
+      content = const Center(
+        child: Text("Grocery List is empty!"),
+      );
+    }
+
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('Your Groceries'),
+          actions: [
+            IconButton(
+              onPressed: _addItem,
+              icon: const Icon(Icons.add),
+            ),
+          ],
+        ),
+        body: content);
   }
 }
