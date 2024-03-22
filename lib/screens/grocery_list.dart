@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_shopping_list/data/categories.dart';
-import 'package:flutter_shopping_list/models/category.dart';
+
 import 'package:flutter_shopping_list/models/grocery_item.dart';
 import 'package:flutter_shopping_list/widgets/list_item.dart';
 import 'package:flutter_shopping_list/widgets/new_item.dart';
@@ -18,6 +18,8 @@ class GroceryList extends StatefulWidget {
 class _GroceryListState extends State<GroceryList> {
   List<GroceryItem> _groceryItems = [];
 
+  var _isLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -31,14 +33,14 @@ class _GroceryListState extends State<GroceryList> {
 
     final response = await http.get(url);
     final Map<String, dynamic> listData = json.decode(response.body);
-    final List<GroceryItem> _loadedItemsList = [];
+    final List<GroceryItem> loadedItemsList = [];
     for (final item in listData.entries) {
       final category = categories.entries
           .firstWhere((categoryItem) =>
               categoryItem.value.title == item.value['category'])
           .value;
 
-      _loadedItemsList.add(
+      loadedItemsList.add(
         GroceryItem(
           id: item.key,
           name: item.value['name'],
@@ -48,18 +50,25 @@ class _GroceryListState extends State<GroceryList> {
       );
     }
     setState(() {
-      _groceryItems = _loadedItemsList;
+      _groceryItems = loadedItemsList;
+      _isLoading = false;
     });
   }
 
   void _addItem() async {
-    await Navigator.of(context).push<GroceryItem>(
+    final newItem = await Navigator.of(context).push<GroceryItem>(
       MaterialPageRoute(
         builder: (ctx) => const NewItem(),
       ),
     );
 
-    _loadItems();
+    if (newItem == null) {
+      return;
+    }
+
+    setState(() {
+      _groceryItems.add(newItem);
+    });
   }
 
   void _removeItem(GroceryItem item) {
@@ -80,10 +89,15 @@ class _GroceryListState extends State<GroceryList> {
         );
       }),
     );
-
     if (_groceryItems.isEmpty) {
       content = const Center(
         child: Text("Grocery List is empty!"),
+      );
+    }
+
+    if (_isLoading) {
+      content = const Center(
+        child: CircularProgressIndicator(),
       );
     }
 
